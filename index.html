@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>تداول صالح PRO</title>
+<meta name="theme-color" content="#060b13">
+<meta name="description" content="تطبيق صالح لإدارة رأس المال وسجل التداول والانضباط — PWA">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{cairo:['Cairo','sans-serif']},colors:{app:{bg:'#060b13',card:'#0f172a',line:'#1e293b',green:'#10b981',red:'#ef4444',amber:'#f59e0b'}}}}}
+</script>
+<style>
+html,body{max-width:100vw;overflow-x:hidden!important;touch-action:manipulation}
+body{font-family:Cairo,sans-serif;background:#060b13;color:#f8fafc;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:#090e17}::-webkit-scrollbar-thumb{background:#243244;border-radius:10px}
+.card{background:rgba(15,23,42,.92);border:1px solid #1e293b;border-radius:20px;box-shadow:0 10px 35px rgba(0,0,0,.18)}
+.glow-g{box-shadow:0 0 26px rgba(16,185,129,.18)} .glow-r{box-shadow:0 0 26px rgba(239,68,68,.18)} .glow-a{box-shadow:0 0 26px rgba(245,158,11,.18)}
+.btn{transition:.18s transform,.18s filter}.btn:active{transform:scale(.97)}
+.tab-active{background:#059669!important;color:#fff!important;box-shadow:0 5px 20px rgba(5,150,105,.25)}
+.safe-top{padding-top:env(safe-area-inset-top)}
+.safe-bottom{padding-bottom:env(safe-area-inset-bottom)}
+@media(max-width:640px){.desktop-only{display:none!important}.mobile-scroll{overflow-x:auto}.mobile-scroll>div{min-width:610px}.card{border-radius:17px}}
+
+/* PWA launch splash */
+#app-splash{position:fixed;inset:0;z-index:9999;background:#060b13;display:flex;align-items:center;justify-content:center;transition:opacity .35s ease,visibility .35s ease}
+#app-splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+#app-splash .splash-card{text-align:center;padding:28px}
+#app-splash img{width:96px;height:96px;border-radius:24px;box-shadow:0 0 40px rgba(16,185,129,.25);margin:0 auto 18px}
+#app-splash .splash-title{color:#fff;font-weight:800;font-size:22px}
+#app-splash .splash-sub{color:#94a3b8;font-size:12px;margin-top:6px}
+#app-splash .splash-loader{width:44px;height:4px;margin:18px auto 0;border-radius:999px;background:#1e293b;overflow:hidden}
+#app-splash .splash-loader span{display:block;width:55%;height:100%;background:#10b981;border-radius:inherit;animation:splashLoad 1.1s ease-in-out infinite}
+@keyframes splashLoad{0%{transform:translateX(-120%)}50%{transform:translateX(120%)}100%{transform:translateX(220%)}}
+</style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+<div id="app-splash" aria-label="جاري تشغيل التطبيق"><div class="splash-card"><img src="./icons/icon-192.png" alt="تداول صالح"><div class="splash-title">تداول صالح</div><div class="splash-sub">إدارة رأس المال والانضباط</div><div class="splash-loader" aria-hidden="true"><span></span></div></div></div>
+
+
+<header class="sticky top-0 z-50 bg-slate-950/92 backdrop-blur-xl border-b border-slate-800/80 safe-top">
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="shrink-0 w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-900/30"><i class="fa-solid fa-chart-line text-xl"></i></div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5"><h1 class="font-black text-sm sm:text-base truncate">تداول صالح</h1><span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 font-black">PRO 5.0</span></div>
+          <p class="text-[10px] text-slate-500 truncate">إدارة رأس المال • الانضباط • سجل الصفقات</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button class="btn px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold" onclick="openSettings()" title="الإعدادات"><i class="fa-solid fa-gear"></i></button>
+        <button class="btn px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold" onclick="toggleSound()" title="الصوت"><i id="soundIcon" class="fa-solid fa-volume-high text-emerald-400"></i></button>
+        <button class="btn hidden sm:flex px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-extrabold items-center gap-1.5" onclick="downloadApp()"><i class="fa-solid fa-file-arrow-down"></i><span>تنزيل</span></button>
+      </div>
+    </div>
+
+    <nav class="mt-3 grid grid-cols-3 gap-1 p-1 rounded-2xl bg-slate-900 border border-slate-800">
+      <button id="tab-dashboard" onclick="switchTab('dashboard')" class="btn tab-active py-2 rounded-xl text-xs font-extrabold"><i class="fa-solid fa-gauge-high me-1"></i> الرئيسية</button>
+      <button id="tab-sessions" onclick="switchTab('sessions')" class="btn py-2 rounded-xl text-xs font-extrabold text-slate-400"><i class="fa-solid fa-calendar-days me-1"></i> الأيام</button>
+      <button id="tab-log" onclick="switchTab('log')" class="btn py-2 rounded-xl text-xs font-extrabold text-slate-400"><i class="fa-solid fa-list-check me-1"></i> السجل <span id="tradeCount" class="ms-1 bg-slate-800 px-1.5 rounded-full text-[9px]">0</span></button>
+    </nav>
+  </div>
+</header>
+
+<section class="sticky top-[119px] z-40 bg-slate-900/96 backdrop-blur border-b border-slate-800 shadow-lg">
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+      <div class="col-span-2 sm:col-span-4 lg:col-span-1 flex items-center justify-between lg:justify-center gap-2 px-2">
+        <span class="text-[11px] font-extrabold text-emerald-400"><i class="fa-solid fa-bolt text-amber-400 me-1"></i>تسجيل سريع</span>
+        <span id="todayDate" class="text-[10px] text-slate-500 font-mono"></span>
+      </div>
+      <select id="qPair" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-[11px] font-bold"><option>EUR/USD OTC</option><option>GBP/USD OTC</option><option>USD/JPY OTC</option><option>AUD/CAD OTC</option><option>EUR/GBP OTC</option><option>BTC/USD OTC</option></select>
+      <select id="qDir" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-[11px] font-bold"><option value="شراء (Call)">🟢 شراء (Call)</option><option value="بيع (Put)">🔴 بيع (Put)</option></select>
+      <div class="relative"><span class="absolute left-2 top-2 text-[11px] text-slate-500">$</span><input id="qAmount" type="number" min="0.1" step="0.1" value="1" oninput="updateQuick()" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-5 pr-2.5 py-2 text-[11px] font-bold text-amber-400"></div>
+      <div class="relative"><span class="absolute left-2 top-2 text-[11px] text-slate-500">%</span><input id="qPayout" type="number" min="10" max="100" value="92" oninput="updateQuick()" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-6 pr-2.5 py-2 text-[11px] font-bold"></div>
+      <div class="grid grid-cols-2 gap-2 col-span-2 sm:col-span-2 lg:col-span-1">
+        <button onclick="quickTrade('ربح')" class="btn rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-[11px] font-black"><i class="fa-solid fa-circle-check me-1"></i><span id="qWin">ربح (+0.92$)</span></button>
+        <button onclick="quickTrade('خسارة')" class="btn rounded-xl bg-gradient-to-r from-rose-600 to-red-500 text-white text-[11px] font-black"><i class="fa-solid fa-circle-xmark me-1"></i><span id="qLoss">خسارة (-1.00$)</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="max-w-7xl mx-auto px-3 sm:px-6 py-5">
+<div id="dashboard" class="space-y-5">
+  <div id="status" class="card p-4 border-emerald-500/25 bg-emerald-950/20">
+    <div class="flex items-center gap-3"><div id="statusIcon" class="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-shield-halved"></i></div><div class="min-w-0"><div class="flex items-center gap-2 flex-wrap"><h2 id="statusTitle" class="font-black text-sm">جاهز للتداول بحسب الخطة</h2><span class="text-[9px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">نظام حماية</span></div><p id="statusMsg" class="text-[11px] text-slate-400 mt-1"></p></div></div>
+    <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px]"><span class="text-slate-500">حد خسارة اليوم</span><strong id="bannerLoss" class="text-rose-400 font-mono"></strong></div>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="card p-4"><div class="flex items-start justify-between"><div><div class="text-[10px] text-slate-500 font-bold">الرصيد الحالي</div><div id="balance" class="text-2xl font-black font-mono mt-1">$0.00</div></div><button onclick="openBalance()" class="text-emerald-400 text-xs"><i class="fa-solid fa-pen"></i></button></div><div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-slate-500">بداية الخطة: <b id="planStart" class="text-slate-300 font-mono">$0.00</b></div></div>
+    <div class="card p-4"><div class="text-[10px] text-slate-500 font-bold">صافي اليوم</div><div id="todayPL" class="text-2xl font-black font-mono mt-1 text-emerald-400">+$0.00</div><div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-slate-500">هدف: <b id="target" class="text-emerald-400 font-mono">$0.00+</b></div></div>
+    <div class="card p-4"><div class="text-[10px] text-slate-500 font-bold">نسبة النجاح</div><div id="winRate" class="text-2xl font-black font-mono mt-1 text-cyan-400">0.0%</div><div class="mt-3 pt-2 border-t border-slate-800 flex justify-between text-[10px]"><span class="text-emerald-400">✓ <b id="wins">0</b></span><span class="text-rose-400">✕ <b id="losses">0</b></span><span class="text-slate-400">− <b id="ties">0</b></span></div></div>
+    <div class="card p-4"><div class="text-[10px] text-slate-500 font-bold">خسائر آخر 12 ساعة</div><div id="loss12" class="text-2xl font-black font-mono mt-1 text-amber-400">0 / 3</div><div class="mt-3 pt-2 border-t border-slate-800 flex justify-between text-[10px]"><span class="text-slate-500">متتالية: <b id="streak" class="text-amber-400">0</b></span><span class="text-slate-500">اليوم: <b id="todayTrades">0</b></span></div></div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-5">
+    <section class="card p-4 sm:p-5 lg:col-span-2">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3"><div><h3 class="font-black text-sm"><i class="fa-solid fa-chart-area text-emerald-400 me-1"></i> منحنى نمو الرصيد</h3><p class="text-[10px] text-slate-500 mt-1">الرصيد بعد كل صفقة</p></div><button onclick="render()" class="btn text-[10px] text-slate-400 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1"><i class="fa-solid fa-rotate"></i></button></div>
+      <div class="h-64 sm:h-72 mt-3"><canvas id="equity"></canvas></div>
+    </section>
+    <section class="card p-4 sm:p-5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3"><h3 class="font-black text-sm"><i class="fa-solid fa-shield-halved text-teal-400 me-1"></i> دستور نظام صالح</h3><button onclick="openSettings()" class="text-[10px] text-emerald-400">تعديل</button></div>
+      <div class="space-y-2 mt-3 text-[11px]">
+        <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="text-slate-500">رأس المال الأولي</span><b id="ruleInitial" class="font-mono">$0</b></div>
+        <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="text-slate-500">بداية الخطة</span><b id="ruleStart" class="font-mono text-emerald-400">$0</b></div>
+        <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="text-slate-500">حجم الصفقة</span><b id="ruleAmount" class="font-mono text-amber-400">$1</b></div>
+        <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="text-slate-500">أقصى خسارة</span><b id="ruleLoss" class="font-mono text-rose-400">$0-</b></div>
+        <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="text-slate-500">هدف الربح</span><b id="ruleTarget" class="font-mono text-emerald-400">$0+</b></div>
+      </div>
+      <button onclick="openTrade()" class="btn w-full mt-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black"><i class="fa-solid fa-plus me-1"></i> تسجيل صفقة تفصيلية</button>
+    </section>
+  </div>
+</div>
+
+<div id="sessions" class="hidden space-y-5">
+  <div class="flex items-center justify-between"><div><h3 class="font-black text-sm"><i class="fa-solid fa-calendar-days text-emerald-400 me-1"></i> تحليل الأيام</h3><p class="text-[10px] text-slate-500 mt-1">ملخص أداء كل يوم تداول</p></div><span id="sessionCount" class="text-[10px] px-3 py-1 rounded-xl bg-slate-800 border border-slate-700 text-slate-400">0 أيام</span></div>
+  <section class="card overflow-hidden mobile-scroll"><div><table class="w-full text-right text-[11px]"><thead class="bg-slate-950 text-slate-500"><tr><th class="px-4 py-3">التاريخ</th><th class="px-4 py-3">الصفقات</th><th class="px-4 py-3">ربح</th><th class="px-4 py-3">خسارة</th><th class="px-4 py-3">Win %</th><th class="px-4 py-3">الصافي</th><th class="px-4 py-3">الإغلاق</th></tr></thead><tbody id="sessionBody" class="divide-y divide-slate-800"></tbody></table></div></section>
+  <div id="emptySessions" class="card p-10 text-center text-slate-500 hidden"><i class="fa-solid fa-calendar-xmark text-3xl opacity-40"></i><p class="text-xs mt-2">لا توجد جلسات مسجلة بعد.</p></div>
+</div>
+
+<div id="log" class="hidden space-y-5">
+  <div class="card p-3 flex flex-col sm:flex-row gap-2 justify-between"><div class="flex flex-wrap gap-2"><button onclick="openTrade()" class="btn px-4 py-2 rounded-xl bg-emerald-600 text-xs font-black"><i class="fa-solid fa-plus me-1"></i>إضافة</button><input id="search" oninput="renderLog()" placeholder="بحث..." class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-[11px] w-40"><select id="filter" onchange="renderLog()" class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-[11px]"><option value="ALL">الكل</option><option value="ربح">الرابحة</option><option value="خسارة">الخاسرة</option><option value="تعادل">التعادل</option></select></div><div class="flex gap-2"><button onclick="loadDemo()" class="btn px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-[11px]"><i class="fa-solid fa-vial text-teal-400 me-1"></i>تجريبية</button><button onclick="exportCSV()" class="btn px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-[11px] text-emerald-400"><i class="fa-solid fa-file-csv me-1"></i>CSV</button><button onclick="clearAll()" class="btn px-3 py-2 rounded-xl bg-rose-950/40 border border-rose-800/50 text-[11px] text-rose-300"><i class="fa-solid fa-trash me-1"></i>مسح</button></div></div>
+  <section class="card overflow-hidden mobile-scroll"><div><table class="w-full text-right text-[11px]"><thead class="bg-slate-950 text-slate-500"><tr><th class="px-4 py-3">#</th><th class="px-4 py-3">الوقت</th><th class="px-4 py-3">الأصل</th><th class="px-4 py-3">الاتجاه</th><th class="px-4 py-3">المبلغ</th><th class="px-4 py-3">Payout</th><th class="px-4 py-3">النتيجة</th><th class="px-4 py-3">P/L</th><th class="px-4 py-3">الرصيد</th><th class="px-4 py-3">الملاحظة</th><th class="px-4 py-3">إجراء</th></tr></thead><tbody id="logBody" class="divide-y divide-slate-800"></tbody></table></div><div id="emptyLog" class="p-10 text-center text-slate-500 hidden"><i class="fa-solid fa-folder-open text-3xl opacity-40"></i><p class="text-xs mt-2">لا توجد صفقات مطابقة.</p></div></section>
+</div>
+</main>
+
+<footer class="border-t border-slate-900 bg-slate-950 text-center text-[10px] text-slate-600 py-4 safe-bottom">تداول صالح © 2026 • سجل محلي على جهازك</footer>
+
+<div id="toastWrap" class="fixed bottom-4 left-4 z-[90] space-y-2 max-w-[calc(100vw-2rem)]"></div>
+
+<!-- Trade Modal -->
+<div id="tradeModal" class="fixed inset-0 z-[80] hidden bg-slate-950/85 backdrop-blur-sm p-4 items-center justify-center">
+<div class="w-full max-w-lg card p-5">
+<div class="flex items-center justify-between border-b border-slate-800 pb-3"><h3 id="tradeTitle" class="font-black">إضافة صفقة</h3><button onclick="closeTrade()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
+<form onsubmit="saveTrade(event)" class="space-y-3 mt-4">
+<input id="tradeIndex" type="hidden" value="-1">
+<div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] text-slate-500">التاريخ</label><input id="tDate" type="datetime-local" required class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-[11px]"></div><div><label class="text-[10px] text-slate-500">الأصل</label><input id="tPair" required class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-[11px]" placeholder="EUR/USD OTC"></div></div>
+<div class="grid grid-cols-3 gap-2"><div><label class="text-[10px] text-slate-500">الاتجاه</label><select id="tDir" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-[11px]"><option value="شراء (Call)">🟢 شراء</option><option value="بيع (Put)">🔴 بيع</option></select></div><div><label class="text-[10px] text-slate-500">المبلغ</label><input id="tAmount" type="number" step="0.1" min="0.1" value="1" required class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-[11px]"></div><div><label class="text-[10px] text-slate-500">العائد %</label><input id="tPayout" type="number" min="10" max="100" value="92" required class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-[11px]"></div></div>
+<div><label class="text-[10px] text-slate-500">النتيجة</label><div class="grid grid-cols-3 gap-2 mt-1"><button type="button" id="resW" onclick="pickResult('ربح')" class="py-2 rounded-xl text-[11px] font-bold border border-emerald-500/40 bg-emerald-500/15 text-emerald-300">🟢 ربح</button><button type="button" id="resL" onclick="pickResult('خسارة')" class="py-2 rounded-xl text-[11px] font-bold border border-slate-800 bg-slate-950 text-slate-400">🔴 خسارة</button><button type="button" id="resT" onclick="pickResult('تعادل')" class="py-2 rounded-xl text-[11px] font-bold border border-slate-800 bg-slate-950 text-slate-400">⚪ تعادل</button></div><input id="tResult" type="hidden" value="ربح"></div>
+<div><label class="text-[10px] text-slate-500">الملاحظة</label><input id="tNote" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-[11px]" placeholder="سبب الدخول / الملاحظة"></div>
+<div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeTrade()" class="btn px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold">إلغاء</button><button class="btn px-5 py-2 rounded-xl bg-emerald-600 text-xs font-black">حفظ</button></div>
+</form></div></div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="fixed inset-0 z-[80] hidden bg-slate-950/85 backdrop-blur-sm p-4 items-center justify-center">
+<div class="w-full max-w-md card p-5"><div class="flex items-center justify-between border-b border-slate-800 pb-3"><h3 class="font-black">إعدادات الخطة</h3><button onclick="closeSettings()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
+<div class="space-y-3 mt-4"><label class="block text-[10px] text-slate-500">رأس المال الأولي<input id="sInitial" type="number" step="0.01" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px]"></label><label class="block text-[10px] text-slate-500">رصيد بداية الخطة<input id="sStart" type="number" step="0.01" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px]"></label><label class="block text-[10px] text-slate-500">أقصى خسارة يومية<input id="sLoss" type="number" step="0.01" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px]"></label><label class="block text-[10px] text-slate-500">الهدف اليومي<input id="sTarget" type="number" step="0.01" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px]"></label></div>
+<div class="flex justify-end gap-2 pt-4"><button onclick="closeSettings()" class="btn px-4 py-2 rounded-xl bg-slate-800 text-xs">إلغاء</button><button onclick="saveSettings()" class="btn px-5 py-2 rounded-xl bg-emerald-600 text-xs font-black">حفظ</button></div></div></div>
+
+<!-- Balance Modal -->
+<div id="balanceModal" class="fixed inset-0 z-[80] hidden bg-slate-950/85 backdrop-blur-sm p-4 items-center justify-center">
+<div class="w-full max-w-sm card p-5"><div class="flex items-center justify-between border-b border-slate-800 pb-3"><h3 class="font-black">مطابقة الرصيد</h3><button onclick="closeBalance()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button></div><p class="text-[10px] text-slate-500 mt-3">أدخل الرصيد الفعلي الموجود في منصة التداول الآن ليتم ضبط بداية الخطة.</p><input id="balanceInput" type="number" step="0.01" class="w-full mt-3 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 font-mono text-emerald-400"><div class="flex justify-end gap-2 pt-4"><button onclick="closeBalance()" class="btn px-4 py-2 rounded-xl bg-slate-800 text-xs">إلغاء</button><button onclick="saveBalance()" class="btn px-5 py-2 rounded-xl bg-emerald-600 text-xs font-black">حفظ</button></div></div></div>
+
+<script>
+const KEY='saleh_trading_app_v5';
+const DEFAULT={initialCapital:23,planStartBalance:19.75,maxDailyLoss:3,targetDailyProfit:20,soundEnabled:true,trades:[]};
+let state=JSON.parse(localStorage.getItem(KEY)||'null')||structuredClone(DEFAULT);
+let chart=null;
+const $=id=>document.getElementById(id);
+function persist(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function money(n){return `$${Number(n||0).toFixed(2)}`}
+function localDateTime(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function dateKey(dt){return dt?dt.split('T')[0]:''}
+function showToast(msg,type='info'){const el=document.createElement('div');const c=type==='success'?'bg-emerald-950/95 border-emerald-500/50 text-emerald-200':type==='warn'?'bg-amber-950/95 border-amber-500/50 text-amber-200':'bg-slate-900 border-slate-700 text-slate-200';el.className=`px-4 py-3 rounded-xl border text-xs font-bold shadow-2xl ${c}`;el.textContent=msg;$('toastWrap').appendChild(el);setTimeout(()=>el.remove(),2600)}
+function play(type){if(!state.soundEnabled)return;try{const c=new (AudioContext||webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.type=type==='win'?'sine':'sawtooth';o.frequency.value=type==='win'?620:180;o.frequency.exponentialRampToValueAtTime(type==='win'?900:90,c.currentTime+.22);g.gain.value=.08;g.gain.exponentialRampToValueAtTime(.01,c.currentTime+.28);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.3)}catch(e){}}
+function toggleSound(){state.soundEnabled=!state.soundEnabled;persist();showToast(state.soundEnabled?'تم تشغيل الصوت 🔊':'تم إيقاف الصوت 🔇','info')}
+function updateSound(){ $('soundIcon').className=state.soundEnabled?'fa-solid fa-volume-high text-emerald-400':'fa-solid fa-volume-xmark text-slate-500'}
+function updateQuick(){const a=parseFloat($('qAmount').value)||1,p=parseFloat($('qPayout').value)||92;$('qWin').textContent=`ربح (+${(a*p/100).toFixed(2)}$)`;$('qLoss').textContent=`خسارة (-${a.toFixed(2)}$)`}
+function quickTrade(result){const a=parseFloat($('qAmount').value)||1,p=parseFloat($('qPayout').value)||92;state.trades.push({datetime:localDateTime(),pair:$('qPair').value,direction:$('qDir').value,amount:a,payout:p,result,notes:'تسجيل سريع'});persist();play(result==='ربح'?'win':'loss');showToast(result==='ربح'?'تم تسجيل ربح ✅':'تم تسجيل خسارة ⚠️',result==='ربح'?'success':'warn')}
+function metrics(){let bal=Number(state.planStartBalance)||0,w=0,l=0,t=0,today=0,todayN=0,streak=0,l12=0;const now=Date.now(),todayK=dateKey(localDateTime());state.trades.forEach(x=>{const p=x.result==='ربح'?x.amount*(x.payout/100):x.result==='خسارة'?-x.amount:0;x.pnl=p;bal+=p;x.runningBalance=bal;if(x.result==='ربح')w++;else if(x.result==='خسارة')l++;else t++;if(dateKey(x.datetime)===todayK){today++;todayN+=p;if(x.result==='خسارة')streak++;else if(x.result==='ربح')streak=0}if(x.result==='خسارة' && now-new Date(x.datetime).getTime()<=12*3600000)l12++});return{bal,w,l,t,today,todayN,streak,l12}}
+function render(){const m=metrics(),dec=m.w+m.l,wr=dec?m.w/dec*100:0;$('balance').textContent=money(m.bal);$('planStart').textContent=money(state.planStartBalance);$('todayPL').textContent=(m.todayN>=0?'+':'')+money(m.todayN);$('todayPL').className=`text-2xl font-black font-mono mt-1 ${m.todayN>=0?'text-emerald-400':'text-rose-400'}`;$('winRate').textContent=wr.toFixed(1)+'%';$('wins').textContent=m.w;$('losses').textContent=m.l;$('ties').textContent=m.t;$('loss12').textContent=`${m.l12} / 3`;$('streak').textContent=m.streak;$('todayTrades').textContent=m.today;$('tradeCount').textContent=state.trades.length;$('target').textContent=money(state.targetDailyProfit)+'+';$('bannerLoss').textContent=money(state.maxDailyLoss)+'-';$('ruleInitial').textContent=money(state.initialCapital);$('ruleStart').textContent=money(state.planStartBalance);$('ruleAmount').textContent='$1.00';$('ruleLoss').textContent=money(state.maxDailyLoss)+'-';$('ruleTarget').textContent=money(state.targetDailyProfit)+'+';status(m);renderLog();renderSessions();updateChart();updateSound();updateQuick()}
+function status(m){const box=$('status'),icon=$('statusIcon'),title=$('statusTitle'),msg=$('statusMsg');box.className='card p-4';if(m.todayN<=-state.maxDailyLoss){box.classList.add('border-rose-500/50','bg-rose-950/25','glow-r');icon.className='w-11 h-11 rounded-2xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-xl shrink-0';icon.innerHTML='<i class="fa-solid fa-ban"></i>';title.textContent='🛑 توقف اليوم';msg.textContent=`وصلت لحد الخسارة اليومية ${money(state.maxDailyLoss)}. أغلق المنصة.`}else if(m.l12>=3){box.classList.add('border-amber-500/50','bg-amber-950/25','glow-a');icon.className='w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-xl shrink-0';icon.innerHTML='<i class="fa-solid fa-hourglass-half"></i>';title.textContent='🛑 توقف 12 ساعة';msg.textContent='وصلت إلى 3 خسائر خلال آخر 12 ساعة. خذ استراحة.'}else if(m.todayN>=state.targetDailyProfit){box.classList.add('border-emerald-500/45','bg-emerald-950/25','glow-g');icon.className='w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xl shrink-0';icon.innerHTML='<i class="fa-solid fa-trophy"></i>';title.textContent='🏆 حققت هدف اليوم';msg.textContent='توقف واحفظ الربح بدل مطاردة المزيد.'}else{box.classList.add('border-emerald-500/25','bg-emerald-950/20');icon.className='w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xl shrink-0';icon.innerHTML='<i class="fa-solid fa-shield-halved"></i>';title.textContent='🟢 التداول متاح بحسب الخطة';msg.textContent=m.today?'التزم بالمبلغ الثابت ولا تضاعف بعد الخسارة.':'يوم جديد. حافظ على رأس المال وابدأ بحجم صغير.'}}
+function initChart(){const ctx=$('equity').getContext('2d');chart=new Chart(ctx,{type:'line',data:{labels:['البداية'],datasets:[{data:[Number(state.planStartBalance)||0],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',fill:true,tension:.35,pointRadius:3,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' الرصيد: '+money(c.raw)}}},scales:{x:{grid:{color:'rgba(51,65,85,.18)'},ticks:{color:'#94a3b8',font:{family:'Cairo'}}},y:{grid:{color:'rgba(51,65,85,.18)'},ticks:{color:'#94a3b8',font:{family:'Cairo'}}}}}})}
+function updateChart(){if(!chart)return;chart.data.labels=['البداية',...state.trades.map((_,i)=>`صفقة ${i+1}`)];chart.data.datasets[0].data=[Number(state.planStartBalance)||0,...state.trades.map(t=>t.runningBalance??0)];const cur=chart.data.datasets[0].data.at(-1);const up=cur>=(Number(state.planStartBalance)||0);chart.data.datasets[0].borderColor=up?'#10b981':'#ef4444';chart.data.datasets[0].backgroundColor=up?'rgba(16,185,129,.08)':'rgba(239,68,68,.08)';chart.update()}
+function renderSessions(){const body=$('sessionBody');body.innerHTML='';const map={};state.trades.forEach(t=>{const k=dateKey(t.datetime)||'غير مؤرخ';if(!map[k])map[k]={n:0,w:0,l:0,t:0,p:0,last:0};map[k].n++;map[k].p+=t.pnl||0;map[k].last=t.runningBalance;if(t.result==='ربح')map[k].w++;else if(t.result==='خسارة')map[k].l++;else map[k].t++});const dates=Object.keys(map).sort().reverse();$('sessionCount').textContent=`${dates.length} أيام`;$('emptySessions').classList.toggle('hidden',dates.length>0);dates.forEach(k=>{const s=map[k],wr=(s.w+s.l)?s.w/(s.w+s.l)*100:0,row=document.createElement('tr');row.className='hover:bg-slate-800/40';row.innerHTML=`<td class="px-4 py-3 font-bold">${k}</td><td class="px-4 py-3">${s.n}</td><td class="px-4 py-3 text-emerald-400">${s.w}</td><td class="px-4 py-3 text-rose-400">${s.l}</td><td class="px-4 py-3 text-cyan-400">${wr.toFixed(0)}%</td><td class="px-4 py-3 font-mono ${s.p>=0?'text-emerald-400':'text-rose-400'}">${s.p>=0?'+':''}${money(s.p)}</td><td class="px-4 py-3 font-mono">${money(s.last)}</td>`;body.appendChild(row)})}
+function renderLog(){const body=$('logBody'),q=($('search')?.value||'').toLowerCase(),f=$('filter')?.value||'ALL';body.innerHTML='';let n=0;state.trades.forEach((t,i)=>{if(!(`${t.pair} ${t.notes||''}`.toLowerCase().includes(q)))return;if(f!=='ALL'&&t.result!==f)return;n++;const tr=document.createElement('tr');tr.className='hover:bg-slate-800/40';const cls=t.result==='ربح'?'text-emerald-400':t.result==='خسارة'?'text-rose-400':'text-slate-300';tr.innerHTML=`<td class="px-4 py-3">#${i+1}</td><td class="px-4 py-3 whitespace-nowrap text-slate-400">${t.datetime||'-'}</td><td class="px-4 py-3 font-bold text-white">${t.pair}</td><td class="px-4 py-3">${t.direction}</td><td class="px-4 py-3 font-mono text-amber-400">${money(t.amount)}</td><td class="px-4 py-3">${t.payout}%</td><td class="px-4 py-3 ${cls} font-bold">${t.result}</td><td class="px-4 py-3 font-mono ${t.pnl>=0?'text-emerald-400':'text-rose-400'}">${t.pnl>=0?'+':''}${money(t.pnl)}</td><td class="px-4 py-3 font-mono">${money(t.runningBalance)}</td><td class="px-4 py-3 text-slate-500 max-w-xs">${t.notes||'-'}</td><td class="px-4 py-3 whitespace-nowrap"><button onclick="editTrade(${i})" class="btn p-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 me-1"><i class="fa-solid fa-pen text-[10px]"></i></button><button onclick="deleteTrade(${i})" class="btn p-1.5 rounded-lg bg-rose-950/50 border border-rose-800/50 text-rose-300"><i class="fa-solid fa-trash text-[10px]"></i></button></td>`;body.appendChild(tr)});$('emptyLog').classList.toggle('hidden',n>0)}
+function switchTab(tab){[['dashboard','tab-dashboard'],['sessions','tab-sessions'],['log','tab-log']].forEach(([v,b])=>{$(v).classList.toggle('hidden',v!==tab);$(b).classList.toggle('tab-active',v===tab);$(b).classList.toggle('text-slate-400',v!==tab)})}
+function openTrade(){ $('tradeIndex').value=-1;$('tradeTitle').textContent='إضافة صفقة';$('tDate').value=localDateTime();$('tPair').value='EUR/USD OTC';$('tDir').value='شراء (Call)';$('tAmount').value=1;$('tPayout').value=92;$('tNote').value='';pickResult('ربح');$('tradeModal').classList.remove('hidden');$('tradeModal').classList.add('flex')}
+function closeTrade(){$('tradeModal').classList.add('hidden');$('tradeModal').classList.remove('flex')}
+function pickResult(r){$('tResult').value=r;['W','L','T'].forEach(x=>$('res'+x).className='py-2 rounded-xl text-[11px] font-bold border border-slate-800 bg-slate-950 text-slate-400');const map={ربح:'W',خسارة:'L',تعادل:'T'},id=map[r];$('res'+id).className=r==='ربح'?'py-2 rounded-xl text-[11px] font-bold border border-emerald-500/40 bg-emerald-500/15 text-emerald-300':r==='خسارة'?'py-2 rounded-xl text-[11px] font-bold border border-rose-500/40 bg-rose-500/15 text-rose-300':'py-2 rounded-xl text-[11px] font-bold border border-slate-600 bg-slate-800 text-white'}
+function saveTrade(e){e.preventDefault();const idx=+$('tradeIndex').value,data={datetime:$('tDate').value,pair:$('tPair').value.trim(),direction:$('tDir').value,amount:+$('tAmount').value||1,payout:+$('tPayout').value||92,result:$('tResult').value,notes:$('tNote').value.trim()};if(idx>=0)state.trades[idx]=data;else state.trades.push(data);persist();closeTrade();showToast(idx>=0?'تم تعديل الصفقة ✏️':'تم حفظ الصفقة ✅','success')}
+function editTrade(i){const t=state.trades[i];if(!t)return;$('tradeIndex').value=i;$('tradeTitle').textContent=`تعديل الصفقة #${i+1}`;$('tDate').value=t.datetime||'';$('tPair').value=t.pair||'';$('tDir').value=t.direction||'شراء (Call)';$('tAmount').value=t.amount;$('tPayout').value=t.payout;$('tNote').value=t.notes||'';pickResult(t.result);$('tradeModal').classList.remove('hidden');$('tradeModal').classList.add('flex')}
+function deleteTrade(i){if(!confirm('حذف هذه الصفقة؟'))return;state.trades.splice(i,1);persist();showToast('تم حذف الصفقة','info')}
+function clearAll(){if(!state.trades.length)return;if(!confirm('مسح جميع الصفقات؟'))return;state.trades=[];persist();showToast('تم مسح السجل','info')}
+function loadDemo(){const n=Date.now(),h=x=>new Date(n-x*3600000).toISOString().slice(0,16);state.trades=[{datetime:h(5),pair:'EUR/USD OTC',direction:'شراء (Call)',amount:1,payout:92,result:'ربح',notes:'دعم قوي'},{datetime:h(4),pair:'GBP/USD OTC',direction:'بيع (Put)',amount:1,payout:88,result:'ربح',notes:'كسر اتجاه'},{datetime:h(3),pair:'USD/JPY OTC',direction:'شراء (Call)',amount:1,payout:92,result:'خسارة',notes:'اختراق كاذب'},{datetime:h(2),pair:'AUD/CAD OTC',direction:'شراء (Call)',amount:1,payout:90,result:'ربح',notes:'إشارة جيدة'}];persist();showToast('تم تحميل صفقات تجريبية 🧪','success')}
+function openSettings(){$('sInitial').value=state.initialCapital;$('sStart').value=state.planStartBalance;$('sLoss').value=state.maxDailyLoss;$('sTarget').value=state.targetDailyProfit;$('settingsModal').classList.remove('hidden');$('settingsModal').classList.add('flex')}
+function closeSettings(){$('settingsModal').classList.add('hidden');$('settingsModal').classList.remove('flex')}
+function saveSettings(){state.initialCapital=+$('sInitial').value||23;state.planStartBalance=+$('sStart').value||19.75;state.maxDailyLoss=+$('sLoss').value||3;state.targetDailyProfit=+$('sTarget').value||20;persist();closeSettings();showToast('تم حفظ الإعدادات ⚙️','success')}
+function openBalance(){$('balanceInput').value=Number($('balance').textContent.replace('$',''))||0;$('balanceModal').classList.remove('hidden');$('balanceModal').classList.add('flex')}
+function closeBalance(){$('balanceModal').classList.add('hidden');$('balanceModal').classList.remove('flex')}
+function saveBalance(){const v=+$('balanceInput').value;if(!Number.isFinite(v)||v<0)return showToast('أدخل رصيداً صحيحاً','warn');const pnl=state.trades.reduce((s,t)=>s+(t.pnl||0),0);state.planStartBalance=v-pnl;persist();closeBalance();showToast('تمت مطابقة الرصيد ✅','success')}
+function exportCSV(){if(!state.trades.length)return showToast('لا توجد بيانات للتصدير','warn');let csv='\uFEFFالتاريخ والوقت,الأصل,الاتجاه,المبلغ,العائد,النتيجة,P/L,الرصيد,الملاحظة\n';state.trades.forEach(t=>{csv+=`"${t.datetime}","${t.pair}","${t.direction}",${t.amount},${t.payout}%,"${t.result}",${t.pnl.toFixed(2)},${t.runningBalance.toFixed(2)},"${(t.notes||'').replaceAll('"','""')}"\n`});const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='سجل_تداول_صالح.csv';a.click();showToast('تم تصدير CSV 📊','success')}
+function downloadApp(){const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));a.download='تداول_صالح_PRO.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);showToast('تم تنزيل ملف التطبيق 💾','success')}
+$('todayDate').textContent=new Date().toLocaleDateString('ar-YE',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+initChart();render();updateQuick();
+</script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('app-splash');
+            if (splash) setTimeout(() => splash.classList.add('hide'), 450);
+        });
+    </script>
+</body>
+</html>
